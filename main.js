@@ -180,6 +180,7 @@
         else if (!hits(above).length && above >= 0) y = above;
       }
       for (var h = 0, hh; h < 3 && (hh = hits(y)).length; h++) y = hh[0].y + hh[0].h + 6;
+      y = Math.max(8, y); /* nie über den oberen Fensterrand, z.B. während die Fensterhöhe sich anpasst */
       pop.style.left = x + 'px'; pop.style.top = y + 'px';
       rows.forEach(function (row, j) { row.classList.toggle('hl', j === i); });
       pop.classList.add('on');
