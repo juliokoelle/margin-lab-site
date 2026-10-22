@@ -861,12 +861,22 @@
   window.addEventListener('resize', render);
   render();
 
-  /* ── Fragen: Antwort blendet weich ein, nur opacity und transform ── */
+  /* ── Fragen: Auf- und Zuklappen mit weicher Höhe statt hartem Sprung ── */
   document.querySelectorAll('.faq details').forEach(function (d) {
-    var answer = d.querySelector('.answer');
-    d.addEventListener('toggle', function () {
-      if (!d.open || reduce || !answer.animate) return;
-      answer.animate([{ opacity: 0, transform: 'translateY(-4px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+    var summary = d.querySelector('summary'), answer = d.querySelector('.answer'), anim = null;
+    summary.addEventListener('click', function (e) {
+      if (reduce || !d.animate) return;
+      e.preventDefault();
+      var start = d.offsetHeight, closing = d.open && !(anim && anim.closing);
+      if (anim) anim.cancel();
+      d.style.overflow = 'hidden';
+      if (!closing) d.open = true;
+      var end = closing ? summary.offsetHeight : summary.offsetHeight + answer.offsetHeight;
+      anim = d.animate({ height: [start + 'px', end + 'px'] }, { duration: closing ? 300 : 420, easing: closing ? 'cubic-bezier(0.4, 0, 0.2, 1)' : 'cubic-bezier(0.22, 1, 0.36, 1)' });
+      anim.closing = closing;
+      answer.animate({ opacity: closing ? [1, 0] : [0, 1] }, { duration: closing ? 200 : 320, easing: 'ease', fill: 'both' });
+      anim.onfinish = function () { if (closing) d.open = false; d.style.overflow = ''; anim = null; };
+      anim.oncancel = function () { d.style.overflow = ''; };
     });
   });
 })();
