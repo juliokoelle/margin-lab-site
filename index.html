@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Margin Lab · Deckungsbeitrag für Cafés</title>
+  <meta name="description" content="Margin Lab liest den Export deiner Kasse und rechnet für jeden Artikel, was nach Umsatzsteuer und Einkauf übrig bleibt. Für kleine Cafés und Gastronomiebetriebe." />
+  <meta property="og:title" content="Margin Lab" />
+  <meta property="og:description" content="Deckungsbeitrag je Artikel aus deinen echten Kassendaten. Für kleine Cafés und Gastronomiebetriebe." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="img/app-uebersicht.jpg" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f4f6f2" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0e1412" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+</head>
+<body>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    /* Gewählte Darstellung vor dem ersten Zeichnen setzen, sonst blitzt der andere Modus auf. */
+    try { var t = localStorage.getItem('ml-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+    document.documentElement.classList.add('js');
+  </script>
+  <script src="main.js" defer></script>
+  <a class="skip" href="#inhalt">Zum Inhalt</a>
+
+  <header class="nav" id="nav">
+    <div class="nav-bar">
+      <a class="mark" href="#" aria-label="Margin Lab, zum Anfang">
+        <img src="img/logo.png" alt="" width="28" height="28" />
+        <span>Margin Lab</span>
+      </a>
+      <nav class="anchors" aria-label="Abschnitte">
+        <a href="#funktionen">Funktionen</a>
+        <a href="#rechner">Rechner</a>
+        <a href="#fragen">Fragen</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme" type="button" id="theme" aria-label="Darstellung: System" title="Darstellung: System">
+          <svg class="i-system" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>
+          <svg class="i-light" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg class="i-dark" viewBox="0 0 20 20" aria-hidden="true"><path d="M16 12.2A6.5 6.5 0 0 1 7.8 4a6.5 6.5 0 1 0 8.2 8.2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </button>
+        <a class="btn primary small" href="#demo">Demo vereinbaren</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="inhalt">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap hero-copy">
+        <h1 class="stagger"><span>Kasse rein.</span> <span class="accent-line">Deckungsbeitrag raus.</span></h1>
+        <p class="lead stagger">Margin Lab liest den Export deiner Kasse und rechnet für jeden Artikel, was nach Umsatzsteuer und Einkauf übrig bleibt.</p>
+        <div class="cta stagger">
+          <a class="btn primary" href="#demo">Demo vereinbaren</a>
+          <a class="btn ghost" href="https://margin-lab.juliokoelle.com">Zur App
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="wrap wide">
+        <div class="stage stagger" id="hero-stage" aria-label="Vorführung: Ein Kassenexport wird eingelesen, je Getränk erscheint der Deckungsbeitrag, daneben der Weg vom Umsatz zum Ergebnis. Fahr über einen Artikel oder tippe auf einen Bereich der App.">
+          <div class="win-top" aria-hidden="true"><i></i><i></i><i></i><span>Margin Lab</span></div>
+          <div class="win">
+            <aside class="win-side">
+              <span class="ws-brand" aria-hidden="true"><img src="img/logo.png" alt="" width="18" height="18" />Margin Lab</span>
+              <div class="ws-tabs" id="ws-tabs" role="tablist" aria-label="Bereiche der App">
+                <span class="ws-thumb" aria-hidden="true"></span>
+                <button type="button" class="ws-item" role="tab" id="wt-uebersicht" data-view="uebersicht" aria-controls="wv-uebersicht" aria-selected="true">Übersicht</button>
+                <button type="button" class="ws-item" role="tab" id="wt-importe" data-view="importe" aria-controls="wv-importe" aria-selected="false" tabindex="-1">Importe</button>
+                <button type="button" class="ws-item" role="tab" id="wt-produkte" data-view="produkte" aria-controls="wv-produkte" aria-selected="false" tabindex="-1">Produkte</button>
+                <button type="button" class="ws-item" role="tab" id="wt-rezepte" data-view="rezepte" aria-controls="wv-rezepte" aria-selected="false" tabindex="-1">Rezepte</button>
+                <button type="button" class="ws-item" role="tab" id="wt-kosten" data-view="kosten" aria-controls="wv-kosten" aria-selected="false" tabindex="-1">Kosten</button>
+                <button type="button" class="ws-item" role="tab" id="wt-szenarien" data-view="szenarien" aria-controls="wv-szenarien" aria-selected="false" tabindex="-1">Szenarien</button>
+              </div>
+            </aside>
+            <div class="win-main">
+             <div class="wviews">
+             <div class="wview on" id="wv-uebersicht" role="tabpanel" aria-labelledby="wt-uebersicht" data-view="uebersicht">
+              <div class="hs-head">
+                <div>
+                  <p class="hs-kicker">Auswertung</p>
+                  <p class="hs-title">September 2026 in Zahlen</p>
+                </div>
+                <div class="drop" id="hs-drop">
+                  <span class="drop-empty">Kassenexport hierher ziehen</span>
+                  <span class="drop-done"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Summen stimmen mit der Kasse</span>
+                </div>
+              </div>
+              <div class="file" id="hs-file" aria-hidden="true">
+                <span class="file-ic">CSV</span>
+                <span><b>beispielcafe_export-2026-09.csv</b><small>2.175 Verkäufe · 7.417,00 € brutto</small></span>
+              </div>
+
+              <div class="hs-cols">
+                <div class="hs-list">
+                  <div class="hl-head"><span>Artikel</span><span>ohne Steuer</span><span>Einkauf</span><span>Bleibt je Stück</span></div>
+                  <div id="hs-rows"></div>
+                </div>
+                <div class="hs-steps">
+                  <p class="hs-sub">Vom Umsatz zum Ergebnis</p>
+                  <div class="steps" id="hs-steps"></div>
+                </div>
+              </div>
+             </div>
+
+             <!-- Weitere Bereiche der App, nachgebaut mit denselben Beispieldaten -->
+             <div class="wview" id="wv-importe" role="tabpanel" aria-labelledby="wt-importe" data-view="importe" inert>
+              <div class="hs-head"><div><p class="hs-kicker">Kassendaten</p><p class="hs-title">Ein Export je Monat</p></div></div>
+              <div class="wv-metrics" id="wv-imp-metrics"></div>
+              <div class="wv-months" id="wv-imp-chart" aria-hidden="true"></div>
+              <div class="wv-table" id="wv-imp-table"></div>
+              <p class="wv-note">Ein neuer Import für denselben Monat ersetzt den alten; dieselbe Datei ein zweites Mal wird erkannt.</p>
+             </div>
+             <div class="wview" id="wv-produkte" role="tabpanel" aria-labelledby="wt-produkte" data-view="produkte" inert>
+              <div class="hs-head"><div><p class="hs-kicker">Kalkulation</p><p class="hs-title">Artikel und Deckungsbeiträge</p></div></div>
+              <div class="wv-table" id="wv-prod-table"></div>
+              <p class="wv-note">Der Steuersatz kommt aus der Kasse, so wie er je Zeile gebucht wurde. Ohne Einkaufspreis steht ein Artikel als „Fehlt noch“ da.</p>
+             </div>
+             <div class="wview" id="wv-rezepte" role="tabpanel" aria-labelledby="wt-rezepte" data-view="rezepte" inert>
+              <div class="hs-head"><div><p class="hs-kicker">Einkauf</p><p class="hs-title">Zutaten und Rezepturen</p></div></div>
+              <div class="wv-rz">
+                <div class="wv-rz-pick" id="wv-rz-pick" role="group" aria-label="Rezept wählen"></div>
+                <div class="wv-rz-card" id="wv-rz-card"></div>
+              </div>
+             </div>
+             <div class="wview" id="wv-kosten" role="tabpanel" aria-labelledby="wt-kosten" data-view="kosten" inert>
+              <div class="hs-head"><div><p class="hs-kicker">Kosten</p><p class="hs-title">Was der Monat kostet</p></div></div>
+              <div class="wv-kbar" id="wv-kost-bar" aria-hidden="true"></div>
+              <div class="wv-table" id="wv-kost-table"></div>
+              <p class="wv-note">Bestätigt und Geschätzt gehen in die Rechnung ein, Geschätzt bleibt gekennzeichnet. Enthalten steckt in einem anderen Block und zählt nicht doppelt.</p>
+             </div>
+             <div class="wview" id="wv-szenarien" role="tabpanel" aria-labelledby="wt-szenarien" data-view="szenarien" inert>
+              <div class="hs-head"><div><p class="hs-kicker">Was wäre, wenn?</p><p class="hs-title">Szenarien</p></div></div>
+              <div class="wv-sz">
+                <div class="wv-sz-levers">
+                  <div class="wv-sz-lever">
+                    <div class="field-head"><label for="wv-sz-range">Preisrunde, alle Getränke</label><output id="wv-sz-out">+10 Cent</output></div>
+                    <input type="range" id="wv-sz-range" min="0" max="50" step="10" value="10" />
+                  </div>
+                  <div class="wv-sz-lever">
+                    <div class="field-head"><label for="wv-sz-menge">Getränke je Verkaufstag</label><output id="wv-sz-menge-out">84</output></div>
+                    <input type="range" id="wv-sz-menge" min="70" max="110" step="1" value="84" />
+                  </div>
+                </div>
+                <div class="wv-sz-res">
+                  <p class="wv-sz-cap"><span>Betriebsergebnis im Monat</span><b id="wv-sz-res">535,69 €</b><small id="wv-sz-plus">+148 € gegen heute</small></p>
+                  <div class="wv-sz-cmp" aria-hidden="true">
+                    <p><span>heute</span><i><i id="wv-sz-bar-a"></i></i><b>387,87 €</b></p>
+                    <p><span>Szenario</span><i><i class="acc" id="wv-sz-bar-b"></i></i><b id="wv-sz-b">535,69 €</b></p>
+                  </div>
+                </div>
+                <p class="wv-sz-sub">Mehr Deckungsbeitrag im Monat je Getränk</p>
+                <div class="wv-sz-list" id="wv-sz-list"></div>
+                <p class="wv-note">Bei der Preisrunde bleibt die Menge gleich, als Annahme. Netto je Artikel mit seinem gebuchten Steuersatz.</p>
+              </div>
+             </div>
+             </div>
+             </div>
+            </div>
+          </div>
+          <div class="pop" id="hs-pop" aria-hidden="true"></div>
+          <svg class="cursor" id="hs-cursor" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 2.5l11 7.2-4.9.9 2.8 5.6-2.1 1-2.8-5.6L4.6 15z" /></svg>
+        </div>
+        <p class="caption">Vorführung mit Beispieldaten, kein echter Betrieb. Fahr über einen Artikel oder tippe auf einen Bereich.</p>
+      </div>
+    </section>
+
+    <!-- Funktionen -->
+    <section class="section" id="funktionen" aria-labelledby="f-titel">
+      <div class="wrap">
+        <p class="eyebrow">Funktionen</p>
+        <h2 id="f-titel" class="stagger">Drei Schritte von der Kasse zur Entscheidung.</h2>
+      </div>
+
+      <div class="wrap feature">
+        <div class="feature-copy stagger">
+          <span class="step">01</span>
+          <h3>Gerechnet wird nur mit Zahlen, die stimmen.</h3>
+          <p>Du lädst einmal im Monat den Export deiner Kasse hoch oder verbindest ready2order direkt. Passen die Summen in der Datei nicht zusammen, rechnet Margin Lab nicht damit, sondern sagt es dir.</p>
+          <p>Die Umsatzsteuer übernimmt Margin Lab so, wie deine Kasse sie gebucht hat. Hast du einen Artikel im Haus und außer Haus verkauft, siehst du beide Sätze.</p>
+        </div>
+        <div class="scene stagger" id="sc-import" aria-label="Vorführung: Der Monat aus der Kasse kommt rein, die Summen werden abgeglichen.">
+          <div class="sc-bar"><span>Importe</span><span class="sc-dim" id="si-name">beispielcafe_export-2026-09.csv</span></div>
+          <div class="csv" id="si-csv" aria-hidden="true"></div>
+          <ul class="checks" id="si-checks"></ul>
+          <div class="sc-foot">
+            <span class="sc-dim" id="si-sum">Vorschau</span>
+            <span class="fake-btn" id="si-btn">Übernehmen</span>
+          </div>
+          <div class="toast" id="si-toast" aria-hidden="true"></div>
+          <svg class="cursor" id="si-cursor" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 2.5l11 7.2-4.9.9 2.8 5.6-2.1 1-2.8-5.6L4.6 15z" /></svg>
+        </div>
+      </div>
+
+      <div class="wrap feature flip">
+        <div class="feature-copy stagger">
+          <span class="step">02</span>
+          <h3>Zwei Hebel: Einkauf und Verkaufspreis.</h3>
+          <p>Für jedes Getränk steht drin, was hineinkommt und was du für die Zutaten zahlst. Wird der Kaffee teurer, ändern sich alle Getränke zugleich, jedes mit seinem eigenen Gewicht.</p>
+          <p>Beim Verkaufspreis siehst du, was eine Preisänderung je Artikel und im Monat bewirkt.</p>
+        </div>
+        <div class="scene stagger" id="sc-hebel" aria-label="Vorführung: Der Kaffeepreis steigt, alle Getränke verlieren Deckungsbeitrag. Danach steigt der Preis eines Cappuccino.">
+          <div class="sc-bar">
+            <span>Szenarien</span>
+            <span class="mini-toggle" id="sh-toggle" data-pos="0"><i></i><b>Einkauf</b><b>Verkaufspreis</b></span>
+          </div>
+          <div class="lever">
+            <div class="lever-head"><span id="sh-label">Kaffeebohnen je kg</span><b id="sh-value">23,00 €</b></div>
+            <div class="track"><span class="track-fill" id="sh-fill"></span><span class="knob" id="sh-knob"></span></div>
+          </div>
+          <div class="drinks" id="sh-drinks"></div>
+          <div class="sc-foot">
+            <span class="sc-dim">Deckungsbeitrag im Monat</span>
+            <b class="delta" id="sh-month">± 0 €</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="wrap feature">
+        <div class="feature-copy stagger">
+          <span class="step">03</span>
+          <h3>Prognose und Gewinnschwelle.</h3>
+          <p>Miete, Personal und die übrigen Kosten trägst du als Blöcke ein. Daraus rechnet Margin Lab den Weg vom Umsatz bis zum Ergebnis und die Gewinnschwelle in Getränken je Verkaufstag.</p>
+          <p>In den Szenarien verschiebst du Menge, Preise und Einkauf und siehst, was am Monatsende bleibt, für die nächsten Monate.</p>
+        </div>
+        <div class="scene stagger" id="sc-prognose" aria-label="Vorführung: Die Prognose für sechs Monate zeichnet sich, dann steigt die Menge um zehn Prozent und das Ergebnis wächst.">
+          <div class="kpis">
+            <div><span class="sc-dim">Betriebsergebnis im Monat</span><b id="sp-result">387,87 €</b></div>
+            <div><span class="sc-dim">Gewinnschwelle</span><b id="sp-break">78 Getränke</b><small class="sc-dim">je Verkaufstag, heute <span id="sp-now">84</span></small></div>
+          </div>
+          <div class="lever">
+            <div class="lever-head"><span>Getränke je Tag</span><b id="sp-lever">± 0 %</b></div>
+            <div class="track"><span class="track-fill" id="sp-fill"></span><span class="knob" id="sp-knob"></span></div>
+          </div>
+          <div class="chart" id="sp-chart" aria-hidden="true">
+            <div class="chart-bars" id="sp-bars"></div>
+            <div class="chart-line"><svg preserveAspectRatio="none" viewBox="0 0 100 100"><polyline id="sp-poly" fill="none" vector-effect="non-scaling-stroke" /></svg><span class="line-cover" id="sp-cover"></span></div>
+          </div>
+          <div class="legend sc-dim"><span><i class="lg-ist"></i>Ist aus der Kasse</span><span><i class="lg-prog"></i>Prognose</span><span><i class="lg-line"></i>ohne Hebel</span></div>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div class="marks stagger">
+          <p class="marks-title">Jede Zahl sagt, woher sie kommt.</p>
+          <ul>
+            <li><b><i class="dot d-kasse"></i>Aus deiner Kasse</b><span>so, wie die Kasse es gebucht hat</span></li>
+            <li><b><i class="dot d-calc"></i>Berechnet</b><span>aus Kassendaten und Einkaufspreisen</span></li>
+            <li><b><i class="dot d-own"></i>Von dir ergänzt</b><span>selbst eingetragen</span></li>
+            <li><b><i class="dot d-miss"></i>Fehlt noch</b><span>ohne diese Angabe kein Deckungsbeitrag</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Im Alltag: drei weitere Ansichten der App, je nach Moment im Betrieb -->
+    <section class="section" id="alltag" aria-labelledby="a-titel">
+      <div class="wrap">
+        <p class="eyebrow">Im Alltag</p>
+        <h2 id="a-titel" class="stagger">Was dir die App sonst noch abnimmt.</h2>
+        <div class="moments stagger" id="moments" role="tablist" aria-label="Momente im Betrieb">
+          <button type="button" class="moment" role="tab" id="mt-0" aria-controls="mp-0" aria-selected="true"><span>Jede Woche und jeden Monat</span><b>Der Report</b><i class="moment-bar"><i></i></i></button>
+          <button type="button" class="moment" role="tab" id="mt-1" aria-controls="mp-1" aria-selected="false" tabindex="-1"><span>Wenn die Rechnung kommt</span><b>Belege</b><i class="moment-bar"><i></i></i></button>
+          <button type="button" class="moment" role="tab" id="mt-2" aria-controls="mp-2" aria-selected="false" tabindex="-1"><span>Wenn du die Karte änderst</span><b>Rezepte</b><i class="moment-bar"><i></i></i></button>
+        </div>
+
+        <div class="feature moment-stage">
+          <div class="moment-copy">
+            <div class="mcopy on" data-m="0">
+              <h3>Ein Bericht, der sagt, was sich bewegt hat.</h3>
+              <p>Kennzahlen gegen den Zeitraum davor und Befunde in ganzen Sätzen, jeder mit seinem Beleg. Was unter einer Schwelle bleibt, wird nicht erwähnt.</p>
+              <p>Ein einzelner Monat bleibt eine Beobachtung, erst Wiederholung macht ein Muster. Den Bericht sicherst du als PDF.</p>
+            </div>
+            <div class="mcopy" data-m="1">
+              <h3>Neue Einkaufspreise direkt aus der Rechnung.</h3>
+              <p>Du lädst die Rechnung deines Großhändlers als PDF oder E-Rechnung hoch. Margin Lab liest die Positionen, ordnet sie deinen Zutaten zu und übernimmt die Preise, wenn die Summe zur Rechnung passt.</p>
+              <p>Beim nächsten Beleg vom selben Händler ist die Zuordnung schon da.</p>
+            </div>
+            <div class="mcopy" data-m="2">
+              <h3>Jedes Getränk mit seinem Rezept.</h3>
+              <p>Vorlagen für die üblichen Kaffeegetränke sind drin. Du siehst je Zutat, was sie kostet; Becher und Deckel zählen nur außer Haus.</p>
+              <p>Mit Hafermilch als Variante siehst du, ob der Aufpreis den höheren Steuersatz trägt.</p>
+            </div>
+          </div>
+
+          <div class="moment-scenes">
+            <!-- Report -->
+            <div class="scene mscene on" id="mp-0" role="tabpanel" aria-labelledby="mt-0" aria-label="Vorführung: Der Report für September mit drei Befunden, danach wird er als PDF gesichert.">
+              <div class="sc-bar"><span>Report</span><span class="sc-dim">September 2026 gegen August</span></div>
+              <div class="rp-kpis">
+                <div><span class="sc-dim">Umsatz je Kassentag</span><b id="rp-tempo">285,27 €</b><span class="chip up">+6,6 %</span></div>
+                <div><span class="sc-dim">Kassentage</span><b>26</b><span class="chip">± 0</span></div>
+              </div>
+              <ol class="rp-finds" id="rp-finds">
+                <li class="good"><p><b>Mehr Umsatz je Kassentag</b><span class="lvl">Fakt</span></p><span>285,27 € statt 267,58 € im August.</span></li>
+                <li><p><b>Samstag vorn, Montag hinten</b><span class="lvl">Beobachtung</span></p><span>Der Samstag bringt im Schnitt 41 % mehr als der Montag.</span></li>
+                <li class="bad"><p><b>Hafer Cappuccino lässt weniger übrig als Cappuccino</b><span class="lvl">Fakt</span></p><span>Außer Haus für 4,10 € mit 19 % bleiben je Stück 0,02 € weniger. Vorschlag: 4,13 €, dann gleichauf.</span></li>
+              </ol>
+              <div class="sc-foot"><span class="sc-dim">Jeder Satz nennt seinen Beleg.</span><span class="fake-btn" id="rp-btn">Als PDF sichern</span></div>
+              <div class="sheet" id="rp-sheet" aria-hidden="true">
+                <p class="sh-t">Report September 2026</p><p class="sh-s">Beispielcafé · 26 Kassentage</p>
+                <i></i><i></i><i class="s"></i><i></i><i class="s"></i>
+                <p class="sh-ok"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Als PDF gesichert</p>
+              </div>
+              <svg class="cursor" id="rp-cursor" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 2.5l11 7.2-4.9.9 2.8 5.6-2.1 1-2.8-5.6L4.6 15z" /></svg>
+            </div>
+
+            <!-- Belege -->
+            <div class="scene mscene" id="mp-1" role="tabpanel" aria-labelledby="mt-1" aria-label="Vorführung: Eine Rechnung vom Großhändler wird gelesen, die Positionen werden den Zutaten zugeordnet und die Preise übernommen.">
+              <div class="sc-bar"><span>Belege</span><span class="sc-dim">rechnung-grosshandel-2026-09-18.pdf</span></div>
+              <ul class="bl-rows" id="bl-rows">
+                <li><span class="bl-n">Vollmilch 3,5 %, 12 × 1 l</span><span class="bl-v">17,40 €</span><span class="bl-arrow" aria-hidden="true"></span><span class="bl-t"><b>Kuhmilch</b><em>1,35 € → 1,45 € je l</em></span></li>
+                <li><span class="bl-n">Hafer Barista, 12 × 1 l</span><span class="bl-v">22,44 €</span><span class="bl-arrow" aria-hidden="true"></span><span class="bl-t"><b>Hafermilch</b><em>1,87 € je l, gleich</em></span></li>
+                <li><span class="bl-n">Kaffeebohnen, 3 × 1 kg</span><span class="bl-v">69,00 €</span><span class="bl-arrow" aria-hidden="true"></span><span class="bl-t"><b>Kaffee</b><em>23,00 € je kg, gleich</em></span></li>
+                <li class="skip-row"><span class="bl-n">Pfand Kisten</span><span class="bl-v">3,30 €</span><span class="bl-arrow" aria-hidden="true"></span><span class="bl-t"><b>nicht übernehmen</b><em>kein Einkaufspreis</em></span></li>
+              </ul>
+              <ul class="checks bl-checks" id="bl-checks"><li class="ok"><span class="ic"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Summe passt zur Rechnung: 112,14 € netto</li></ul>
+              <div class="sc-foot"><span class="sc-dim" id="bl-sum">Milchgetränke verlieren je Tasse 2 bis 3 Cent</span><span class="fake-btn" id="bl-btn">Übernehmen</span></div>
+              <div class="toast" id="bl-toast" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ein neuer Einkaufspreis übernommen, Rezepte neu gerechnet.</div>
+              <svg class="cursor" id="bl-cursor" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 2.5l11 7.2-4.9.9 2.8 5.6-2.1 1-2.8-5.6L4.6 15z" /></svg>
+            </div>
+
+            <!-- Rezepte -->
+            <div class="scene mscene" id="mp-2" role="tabpanel" aria-labelledby="mt-2" aria-label="Vorführung: Das Rezept eines Cappuccino, danach mit Hafermilch als Variante; je Zutat der Einkauf, unten was im Haus und außer Haus bleibt.">
+              <div class="sc-bar"><span id="rz-name">Cappuccino</span><span class="mini-toggle" id="rz-toggle" data-pos="0"><i></i><b>Kuhmilch</b><b>Hafermilch</b></span></div>
+              <ul class="rz-rows">
+                <li><span>Kaffee</span><span class="sc-dim">9 g zu 23,00 € je kg</span><b>0,21 €</b></li>
+                <li><span id="rz-milk">Kuhmilch</span><span class="sc-dim" id="rz-milk-d">200 ml zu 1,35 € je l</span><b id="rz-milk-v">0,27 €</b></li>
+                <li class="rz-cup"><span>Becher und Deckel</span><span class="sc-dim">nur außer Haus</span><b>0,10 €</b></li>
+              </ul>
+              <div class="rz-price"><span class="sc-dim">Verkaufspreis</span><b id="rz-price">3,60 €</b></div>
+              <div class="rz-out">
+                <div><span class="sc-dim">Bleibt im Haus</span><b id="rz-in">2,55 €</b><small class="sc-dim" id="rz-in-s">19 %, ohne Becher</small></div>
+                <div><span class="sc-dim">Bleibt außer Haus</span><b id="rz-out">2,79 €</b><small class="sc-dim" id="rz-out-s">7 %, mit Becher</small></div>
+              </div>
+              <p class="rz-note" id="rz-note" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rechner -->
+    <section class="section calc-section" id="rechner" aria-labelledby="r-titel">
+      <div class="wrap">
+        <p class="eyebrow">Rechner</p>
+        <h2 id="r-titel" class="stagger">Rechne deinen Cappuccino.</h2>
+        <p class="sub stagger">Drück die Tasten oder schieb die Regler. Gerechnet wird wie in der App: Verkaufspreis ohne Umsatzsteuer, minus Einkauf.</p>
+
+        <div class="calc stagger">
+          <div class="cup-side" aria-live="polite">
+            <div class="cup-wrap">
+              <div class="cup" aria-hidden="true">
+                <!-- Glasierte Tasse, glatt und leicht glänzend; die Glasurbänder teilen den Preis: unten was bleibt, darüber Einkauf, oben Umsatzsteuer. -->
+                <svg class="mug" viewBox="0 0 220 220" focusable="false">
+                  <defs>
+                    <clipPath id="mug-body"><path d="M17 30 C15 92 17 150 23 178 C28 199 41 207 61 208 L119 208 C139 207 151 199 156 178 C162 150 163 92 161 30 Z" /></clipPath>
+                    <linearGradient id="mug-shade" x1="0" x2="1" y1="0" y2="0">
+                      <stop offset="0" stop-color="#000" stop-opacity=".06" /><stop offset=".5" stop-color="#000" stop-opacity="0" /><stop offset="1" stop-color="#000" stop-opacity=".12" />
+                    </linearGradient>
+                    <linearGradient id="mug-light" x1="0" x2="1" y1="0" y2="0">
+                      <stop offset=".1" stop-color="#fff" stop-opacity="0" /><stop offset=".2" stop-color="#fff" stop-opacity=".5" /><stop offset=".3" stop-color="#fff" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient id="mug-gloss" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0" stop-color="#fff" stop-opacity=".22" /><stop offset=".25" stop-color="#fff" stop-opacity="0" />
+                    </linearGradient>
+                    <radialGradient id="mug-inner" cx=".5" cy=".2" r=".8"><stop offset="0" style="stop-color: var(--cup-in-2)" /><stop offset="1" style="stop-color: var(--cup-in)" /></radialGradient>
+                    <filter id="mug-soft" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="5" /></filter>
+                  </defs>
+                  <ellipse class="mug-shadow" cx="90" cy="212" rx="70" ry="5.5" filter="url(#mug-soft)" />
+                  <path class="mug-handle" d="M156 70 C196 62 210 92 204 116 C198 140 176 150 156 146" />
+                  <path class="mug-handle-in" d="M156 70 C196 62 210 92 204 116 C198 140 176 150 156 146" />
+                  <path class="mug-clay" d="M17 30 C15 92 17 150 23 178 C28 199 41 207 61 208 L119 208 C139 207 151 199 156 178 C162 150 163 92 161 30 Z" />
+                  <g clip-path="url(#mug-body)">
+                    <g class="glaze g-ust" id="l-ust"><path d="M4 3 C24 0 40 5 62 3 S104 0 124 3 S160 6 176 3 L176 240 L4 240 Z" /><path class="g-gloss" d="M4 3 C24 0 40 5 62 3 S104 0 124 3 S160 6 176 3 L176 240 L4 240 Z" /></g>
+                    <g class="glaze g-we" id="l-we"><path d="M4 3 C24 0 40 5 62 3 S104 0 124 3 S160 6 176 3 L176 240 L4 240 Z" /><path class="g-gloss" d="M4 3 C24 0 40 5 62 3 S104 0 124 3 S160 6 176 3 L176 240 L4 240 Z" /></g>
+                    <g class="glaze g-db" id="l-db"><path d="M4 3 C24 0 40 5 62 3 S104 0 124 3 S160 6 176 3 L176 240 L4 240 Z" /><path class="g-gloss" d="M4 3 C24 0 40 5 62 3 S104 0 124 3 S160 6 176 3 L176 240 L4 240 Z" /></g>
+                    <rect x="0" y="0" width="220" height="220" fill="url(#mug-shade)" />
+                    <rect x="0" y="0" width="220" height="220" fill="url(#mug-light)" />
+                  </g>
+                  <ellipse class="mug-rim" cx="89" cy="30" rx="72" ry="10" />
+                  <ellipse class="mug-in" cx="89" cy="31" rx="68" ry="8" fill="url(#mug-inner)" />
+                </svg>
+              </div>
+              <div class="cup-labels">
+                <p class="cl" id="cl-ust"><span>Umsatzsteuer</span><b id="o-ust">0,00 €</b></p>
+                <p class="cl" id="cl-we"><span>Einkauf</span><b id="o-we">0,00 €</b></p>
+                <p class="cl cl-db" id="cl-db"><span>Deckungsbeitrag</span><b id="o-db2">0,00 €</b></p>
+              </div>
+            </div>
+            <div class="out">
+              <p class="out-label">Deckungsbeitrag je Cappuccino bei <span id="o-preis">3,60 €</span></p>
+              <p class="out-big"><span id="o-db">0,00 €</span></p>
+              <p class="out-meta"><span id="o-quote">0 %</span> vom Preis ohne Steuer</p>
+              <div class="out-grid">
+                <div>
+                  <p class="out-label">Im Monat</p>
+                  <p class="out-mid" id="o-monat">0 €</p>
+                  <p class="out-meta" id="o-monat-meta"></p>
+                </div>
+                <div>
+                  <p class="out-label">Gewinnschwelle</p>
+                  <p class="out-mid" id="o-schwelle">0</p>
+                  <p class="out-meta" id="o-schwelle-meta"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form class="controls" id="calc" onsubmit="return false">
+            <div class="peek" aria-hidden="true"><span>Je Cappuccino <b id="p-db">0,00 €</b></span><span>Im Monat <b id="p-monat">0 €</b></span></div>
+            <div class="keys" role="group" aria-label="Verkaufspreis und Umsatzsteuer">
+              <button type="button" class="key" data-key="-" aria-label="Preis 10 Cent weniger, Taste Minus"><span class="key-glyph">−</span><span class="key-label">10 Cent</span></button>
+              <button type="button" class="key" data-key="+" aria-label="Preis 10 Cent mehr, Taste Plus"><span class="key-glyph">+</span><span class="key-label">10 Cent</span></button>
+              <span class="key-sep" aria-hidden="true"></span>
+              <button type="button" class="key key-wide" data-key="h" data-ust="0.19" aria-pressed="true" aria-label="Im Haus, 19 Prozent, Taste H"><span class="key-glyph">H</span><span class="key-label">Im Haus <span>19 %</span></span></button>
+              <button type="button" class="key key-wide" data-key="a" data-ust="0.07" aria-pressed="false" aria-label="Außer Haus, 7 Prozent, Taste A"><span class="key-glyph">A</span><span class="key-label">Außer Haus <span>7 %</span></span></button>
+            </div>
+            <p class="hint keys-hint">Kuhmilch außer Haus 7 %, im Haus 19 %. Hafermilch immer 19 %. Becher und Deckel zählen außer Haus; im Haus stehen sie auf 0, du kannst sie trotzdem einstellen. Die Tasten funktionieren auch auf deiner Tastatur.</p>
+
+            <div class="field">
+              <div class="field-head"><label for="preis">Verkaufspreis brutto</label><output data-for="preis"></output></div>
+              <input type="range" id="preis" min="2" max="6" step="0.1" value="3.6" data-unit="eur" />
+            </div>
+            <div class="field-group">
+              <p class="group-label">Einkauf je Getränk, netto</p>
+              <div class="field">
+                <div class="field-head"><label for="bohne">Kaffee</label><output data-for="bohne"></output></div>
+                <input type="range" id="bohne" min="0.05" max="0.6" step="0.01" value="0.21" data-unit="eur" />
+              </div>
+              <div class="field">
+                <div class="field-head"><label for="milch">Milch</label><output data-for="milch"></output></div>
+                <input type="range" id="milch" min="0" max="0.6" step="0.01" value="0.27" data-unit="eur" />
+              </div>
+              <div class="field">
+                <div class="field-head"><label for="becher">Becher und Deckel</label><output data-for="becher"></output></div>
+                <input type="range" id="becher" min="0" max="0.4" step="0.01" value="0" data-unit="eur" />
+              </div>
+            </div>
+            <div class="field-group">
+              <p class="group-label">Menge und Kosten</p>
+              <div class="field">
+                <div class="field-head"><label for="menge">Cappuccino am Tag</label><output data-for="menge"></output></div>
+                <input type="range" id="menge" min="5" max="200" step="1" value="60" data-unit="stk" />
+              </div>
+              <div class="field">
+                <div class="field-head"><label for="tage">Verkaufstage im Monat</label><output data-for="tage"></output></div>
+                <input type="range" id="tage" min="15" max="31" step="1" value="26" data-unit="tage" />
+              </div>
+              <div class="field">
+                <div class="field-head"><label for="fix">Fixkosten im Monat</label><output data-for="fix"></output></div>
+                <input type="range" id="fix" min="0" max="15000" step="100" value="4000" data-unit="eur0" />
+              </div>
+            </div>
+            <p class="note">Bewusst vereinfacht: ein Artikel statt deines ganzen Sortiments, Einkauf netto mit Vorsteuerabzug, ohne Schwund, Becher und Deckel nur außer Haus. Die Gewinnschwelle tut so, als trüge der Cappuccino die Fixkosten allein. In der App rechnet Margin Lab mit allen Artikeln, dem gebuchten Steuersatz je Zeile und deinem Außer-Haus-Anteil.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo -->
+    <section class="section demo" id="demo" aria-labelledby="d-titel">
+      <div class="wrap demo-inner stagger">
+        <div>
+          <p class="eyebrow">Demo</p>
+          <h2 id="d-titel">Schau es dir mit deinen eigenen Zahlen an.</h2>
+          <p class="sub">Wir lesen gemeinsam einen Monat deiner Kasse ein und gehen die Artikel durch. Schreib kurz, welche Kasse du nutzt.</p>
+        </div>
+        <div class="demo-actions">
+          <!-- CAL_LINK: Sobald es einen Kalenderlink gibt, hier statt mailto eintragen (die Knöpfe "Demo vereinbaren" oben zeigen auf diesen Abschnitt). -->
+          <a class="btn primary" id="demo-link" href="mailto:juliokoelle@gmail.com?subject=Margin%20Lab%20Demo">Demo per Mail anfragen</a>
+          <p class="hint">Die Mail geht direkt an Julio Koelle.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fragen -->
+    <section class="section" id="fragen" aria-labelledby="q-titel">
+      <div class="wrap narrow">
+        <p class="eyebrow">Fragen</p>
+        <h2 id="q-titel" class="stagger">Häufige Fragen</h2>
+        <div class="faq stagger">
+          <details>
+            <summary>Welche Kassen funktionieren?<i aria-hidden="true"></i></summary>
+            <div class="answer"><p>ready2order ist direkt angebunden: Du gibst den Zugang in ready2order frei, danach holt Margin Lab die Kassentage selbst ab. Ohne Anbindung liest du den Artikelexport als CSV ein, mit Artikel, Menge, Preis und Steuersatz. Gebaut ist der Import für den Export von ready2order. Ob deine Kasse passt, schauen wir in der Demo an.</p></div>
+          </details>
+          <details>
+            <summary>Wo liegen meine Daten?<i aria-hidden="true"></i></summary>
+            <div class="answer"><p>Die Kassendatei wird in deinem Browser gelesen. Mit Konto liegt der Arbeitsstand in einer Datenbank bei Supabase in Frankfurt am Main. Andere Konten haben keinen Zugriff darauf; die Trennung ist in der Datenbank selbst festgelegt. Die Einzelheiten stehen in der <a href="https://margin-lab.juliokoelle.com/#datenschutz">Datenschutzerklärung</a>.</p></div>
+          </details>
+          <details>
+            <summary>Was kostet Margin Lab?<i aria-hidden="true"></i></summary>
+            <div class="answer"><p>Wir sprechen das in der Demo ab.</p></div>
+          </details>
+          <details>
+            <summary>Muss ich alle Rezepte selbst anlegen?<i aria-hidden="true"></i></summary>
+            <div class="answer"><p>Vorlagen für die üblichen Kaffeegetränke sind schon drin, von Espresso bis Latte Macchiato, mit Hafermilch als Variante. Du trägst die Preise deiner Zutaten mit Gebinde ein. Für den Anfang reichen fünf Preise. Artikel ohne Rezept bekommen einen Einkaufspreis je Stück oder stehen als „Fehlt noch“ da.</p></div>
+          </details>
+          <details>
+            <summary>Wie geht Margin Lab mit der Umsatzsteuer um?<i aria-hidden="true"></i></summary>
+            <div class="answer"><p>Es nimmt keinen Satz an, sondern den, den deine Kasse je Zeile gebucht hat. Steht derselbe Artikel mit zwei Sätzen in der Kasse, etwa im Haus und außer Haus, siehst du beide mit ihrem Anteil am Umsatz.</p></div>
+          </details>
+          <details>
+            <summary>Ersetzt das meinen Steuerberater?<i aria-hidden="true"></i></summary>
+            <div class="answer"><p>Nein. Margin Lab rechnet Deckungsbeiträge und zeigt Steuern als Rechenbeispiel zur Rücklage. Jede dieser Zeilen trägt den Hinweis „Beispiel, keine Beratung“.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot-row">
+        <p class="foot-claim">Deckungsbeitragsrechnung für kleine Cafés und Gastronomiebetriebe.</p>
+        <nav aria-label="Weitere Seiten">
+          <a href="https://margin-lab.juliokoelle.com">Zur App</a>
+          <a href="#demo">Demo vereinbaren</a>
+          <a href="https://margin-lab.juliokoelle.com/#impressum">Impressum</a>
+          <a href="https://margin-lab.juliokoelle.com/#datenschutz">Datenschutz</a>
+        </nav>
+      </div>
+      <p class="foot-mark" aria-hidden="true">Margin Lab</p>
+    </div>
+  </footer>
+</body>
+</html>
